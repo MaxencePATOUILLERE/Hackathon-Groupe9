@@ -31,7 +31,7 @@ Bienvenue dans le Hackathon Ynov Toulouse 2025 !
 - Dev' FullStack 2 : BOTROS John
 - Dev' FullStack 3 : BOUGOULA Gaëtan
 - Cloud & Infrastructure 1 : MARTINELLI Rafael
-- Cloud & Infrastructure 2 : PATOUILLERE Maxence
+- Cloud & Infrastructure 2 - Chef de projet : PATOUILLERE Maxence
 - IA & Data 1 : FROMONT Julien
 - IA & Data 2 : BADR Ibrahim
 
