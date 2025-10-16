@@ -34,6 +34,7 @@ Bienvenue dans le Hackathon Ynov Toulouse 2025 !
 - Cloud & Infrastructure 2 - Chef de projet : PATOUILLERE Maxence
 - IA & Data 1 : FROMONT Julien
 - IA & Data 2 : BADR Ibrahim
+- IA & Data 3 : GOZZO Giovanni
 
 > Préciser qui est le porte parole de l'équipe, c'est lui qui répondra aux questions si nécessaire.
 
