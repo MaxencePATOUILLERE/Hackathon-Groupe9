@@ -1,0 +1,29 @@
+- name: Initialiser le Swarm sur le manager
+  hosts: manager
+  become: yes
+  tasks:
+    - name: Initialiser le swarm (si pas déjà fait)
+      shell: docker swarm init --advertise-addr {{ ansible_host }}
+      args:
+        creates: /tmp/swarm_initialized
+      register: swarm_init
+
+    - name: Sauvegarder le token worker
+      shell: docker swarm join-token -q worker
+      register: worker_token
+
+    - name: Définir le token comme variable
+      set_fact:
+        swarm_worker_token: "{{ worker_token.stdout }}"
+
+- name: Faire rejoindre les workers au Swarm
+  hosts: worker
+  become: yes
+  tasks:
+    - name: Joindre le Swarm
+      shell: >
+        docker swarm join
+        --token {{ hostvars[groups['manager'][0]].swarm_worker_token }}
+        {{ hostvars[groups['manager'][0]].ansible_host }}:2377
+      args:
+        creates: /tmp/swarm_joined
