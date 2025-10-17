@@ -1,0 +1,31 @@
+table_id,table_condition,nom,statuts
+T05,beer stains,Babyfoot de Ynov Toulouse,available
+T07,worn,Babyfoot de Cafeteria,available
+T26,scratched,Babyfoot de Gym Hall,available
+T21,worn,Babyfoot de Salle Polyvalente,available
+T24,scratched,Babyfoot de Ynov Toulouse,available
+T20,out of alignment,Babyfoot de Lab 204,available
+T18,scratched,Babyfoot de Student House,available
+T10,scratched,Babyfoot de Ynov Toulouse,available
+T03,missing screw,Babyfoot de Ynov Toulouse,available
+T22,broken leg,Babyfoot de Gym Hall,available
+T08,missing screw,Babyfoot de Ynov Toulouse,available
+T11,scratched,Babyfoot de Salle Polyvalente,available
+T23,scratched,Babyfoot de Ynov Toulouse,available
+T27,sticky handles,Babyfoot de Bar Le Foos,available
+T01,scratched,Babyfoot de Bar Le Foos,available
+T28,worn,Babyfoot de Bar Le Foos,available
+T14,needs cleaning,Babyfoot de Bar Le Foos,available
+T17,new,Babyfoot de Ynov Toulouse,available
+T12,beer stains,Babyfoot de Cafeteria,available
+T19,beer stains,Babyfoot de Gym Hall,available
+T09,scratched,Babyfoot de Bar Le Foos,available
+T29,good,Babyfoot de Gym Hall,available
+T04,new,Babyfoot de Ynov Toulouse,available
+T13,worn,Babyfoot de Cafeteria,available
+T30,new,Babyfoot de Lab 204,available
+T16,scratched,Babyfoot de Cafeteria,available
+T02,new,Babyfoot de Student House,available
+T15,missing screw,Babyfoot de Ynov Toulouse,available
+T06,new,Babyfoot de Gym Hall,available
+T25,missing screw,Babyfoot de Gym Hall,available
