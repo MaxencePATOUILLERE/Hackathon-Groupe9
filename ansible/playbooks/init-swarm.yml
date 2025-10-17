@@ -26,8 +26,7 @@
   become: true
   gather_facts: true
   vars:
-  # Tu peux fixer manuellement l'IP d’annonce si besoin :
-  # swarm_advertise_addr: "10.0.0.10"
+
   tasks:
     - name: Detect manager IP to advertise
       ansible.builtin.set_fact:
@@ -61,7 +60,6 @@
           - "{{ hostvars[groups['manager'][0]].swarm_manager_ip }}"
         advertise_addr: "{{ ansible_default_ipv4.address }}"
 
-# (Optionnel) créer un réseau overlay attachable pour vos stacks / services
 - name: Create shared overlay network on manager (optional)
   hosts: manager
   become: true
@@ -74,7 +72,6 @@
         scope: swarm
         state: present
 
-# (Optionnel) affichage d'un petit récap
 - name: Show swarm status
   hosts: manager
   become: true

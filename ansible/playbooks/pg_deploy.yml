@@ -6,13 +6,12 @@
   gather_facts: true
 
   vars:
-    # Chemins déjà présents sur le serveur
     project_root: "/home/hack-usr/hackathon"
     dockerfile_path: "{{ project_root }}/Dockerfile"
-    sql_dir: "{{ project_root }}"          # où se trouve init.sql
-    csv_dir: "{{ project_root }}/db"       # où sont tes CSV
+    sql_dir: "{{ project_root }}"
+    csv_dir: "{{ project_root }}/db"
 
-    data_dir: "/srv/postgres/hackathon/data"  # volume persistant
+    data_dir: "/srv/postgres/hackathon/data"
 
     # Container settings
     image_name: "hackathon-postgres"

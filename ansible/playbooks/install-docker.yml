@@ -5,8 +5,8 @@
   gather_facts: true
 
   vars:
-    docker_purge_data: false          # ⚠️ true = supprime /var/lib/docker & /var/lib/containerd & /etc/docker
-    docker_pkg_state: present         # ou "latest"
+    docker_purge_data: false
+    docker_pkg_state: present
     docker_sysctl:
       net.ipv4.ip_forward: 1
       net.bridge.bridge-nf-call-iptables: 1
@@ -32,7 +32,7 @@
       ignore_errors: true
       when: ansible_facts['os_family'] == "Debian"
 
-    # --- Assainir les sources APT Docker (évite l’erreur Signed-By != vide) ---
+
     - name: Remove any docker*.list in sources.list.d
       ansible.builtin.file:
         path: "{{ item }}"
