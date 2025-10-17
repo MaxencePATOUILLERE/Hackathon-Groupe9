@@ -1,0 +1,96 @@
+---
+- name: Build and run PostgreSQL container from existing files
+  hosts: worker,manager
+
+  become: true
+  gather_facts: true
+
+  vars:
+    # Chemins déjà présents sur le serveur
+    project_root: "/home/hack-usr/hackathon"
+    dockerfile_path: "{{ project_root }}/Dockerfile"
+    sql_dir: "{{ project_root }}"          # où se trouve init.sql
+    csv_dir: "{{ project_root }}/db"       # où sont tes CSV
+
+    data_dir: "/srv/postgres/hackathon/data"  # volume persistant
+
+    # Container settings
+    image_name: "hackathon-postgres"
+    image_tag: "latest"
+    container_name: "hackaton_db"
+    container_pgdata: "/var/lib/postgresql/data/pgdata"
+    container_initdir: "/docker-entrypoint-initdb.d"
+    container_importdir: "/import"
+    pg_port: 5432
+
+    POSTGRES_DB: "hackaton_db"
+    POSTGRES_USER: "admin"
+    POSTGRES_PASSWORD: "admin"
+
+  pre_tasks:
+    - name: Ensure python docker SDK present (Debian/Ubuntu)
+      ansible.builtin.apt:
+        name: python3-docker
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Ensure directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ project_root }}"
+        - "{{ csv_dir }}"
+        - "{{ data_dir }}"
+
+  tasks:
+    - name: Build Docker image from local Dockerfile
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        tag: "{{ image_tag }}"
+        source: build
+        build:
+          path: "{{ project_root }}"
+          dockerfile: "{{ dockerfile_path }}"
+
+    - name: Run Postgres container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}:{{ image_tag }}"
+        restart_policy: always
+        env:
+          POSTGRES_DB: "{{ POSTGRES_DB }}"
+          POSTGRES_USER: "{{ POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "{{ POSTGRES_PASSWORD }}"
+          PGDATA: "{{ container_pgdata }}"
+        published_ports:
+          - "{{ pg_port }}:5432"
+        volumes:
+          - "{{ data_dir }}:{{ container_pgdata | regex_replace('/pgdata$','') }}"
+          - "{{ sql_dir }}:{{ container_initdir }}:ro"
+          - "{{ csv_dir }}:{{ container_importdir }}:ro"
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U {{ POSTGRES_USER }} -d {{ POSTGRES_DB }}"]
+          interval: 10s
+          timeout: 5s
+          retries: 10
+        state: started
+
+    - name: Wait for PostgreSQL to be ready
+      ansible.builtin.wait_for:
+        host: "127.0.0.1"
+        port: "{{ pg_port }}"
+        delay: 2
+        timeout: 120
+
+  post_tasks:
+    - name: Show tables
+      ansible.builtin.command: >
+        docker exec {{ container_name }}
+        psql -U {{ POSTGRES_USER }} -d {{ POSTGRES_DB }} -c "\dt"
+      register: tables
+      changed_when: false
+    - ansible.builtin.debug:
+        var: tables.stdout_lines
