@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 
-export function Hero() {
+export function Top() {
     return (
         <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/30 via-accent/10 to-background" />

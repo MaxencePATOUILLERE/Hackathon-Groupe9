@@ -81,3 +81,6 @@ export function Features() {
         </section>
     )
 }
+
+export default class Feature {
+}

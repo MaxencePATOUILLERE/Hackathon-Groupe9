@@ -32,6 +32,13 @@ export function Header() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <Link href="/admin" passHref>
+                            <Button variant="ghost" className="hidden md:inline-flex">
+                                Admin
+                            </Button>
+                        </Link>
+                    </div>
+                    <div className="flex items-center gap-3">
                         <Link href="/connexion" passHref>
                             <Button variant="ghost" className="hidden md:inline-flex">
                                 Connexion
