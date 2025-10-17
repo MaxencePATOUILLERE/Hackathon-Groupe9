@@ -1,29 +1,87 @@
-- name: Initialiser le Swarm sur le manager
+- name: Ensure Docker SDK for Python present (for community.docker modules)
+  hosts: manager,worker
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Install python3-docker on Debian/Ubuntu
+      ansible.builtin.apt:
+        name: python3-docker
+        state: present
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install pip docker on RedHat (fallback)
+      ansible.builtin.package:
+        name: python3-pip
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Ensure docker SDK via pip (RedHat only)
+      ansible.builtin.pip:
+        name: docker
+      when: ansible_facts['os_family'] == "RedHat"
+
+- name: Initialize Swarm on manager
   hosts: manager
-  become: yes
+  become: true
+  gather_facts: true
+  vars:
+  # Tu peux fixer manuellement l'IP d’annonce si besoin :
+  # swarm_advertise_addr: "10.0.0.10"
   tasks:
-    - name: Initialiser le swarm (si pas déjà fait)
-      shell: docker swarm init --advertise-addr {{ ansible_host }}
-      args:
-        creates: /tmp/swarm_initialized
-      register: swarm_init
+    - name: Detect manager IP to advertise
+      ansible.builtin.set_fact:
+        swarm_manager_ip: "{{ swarm_advertise_addr | default(ansible_default_ipv4.address) }}"
 
-    - name: Sauvegarder le token worker
-      shell: docker swarm join-token -q worker
-      register: worker_token
+    - name: Initialize (or ensure) Swarm on manager
+      community.docker.docker_swarm:
+        state: present
+        advertise_addr: "{{ swarm_manager_ip }}"
+        listen_addr: "{{ swarm_manager_ip }}:2377"
 
-    - name: Définir le token comme variable
-      set_fact:
-        swarm_worker_token: "{{ worker_token.stdout }}"
+    - name: Get swarm join tokens
+      community.docker.docker_swarm_info:
+      register: swarm_info
 
-- name: Faire rejoindre les workers au Swarm
+    - name: Expose tokens as host facts
+      ansible.builtin.set_fact:
+        swarm_worker_token: "{{ swarm_info.swarm_facts.JoinTokens.Worker }}"
+        swarm_manager_token: "{{ swarm_info.swarm_facts.JoinTokens.Manager }}"
+
+- name: Join workers to swarm
   hosts: worker
-  become: yes
+  become: true
+  gather_facts: true
   tasks:
-    - name: Joindre le Swarm
-      shell: >
-        docker swarm join
-        --token {{ hostvars[groups['manager'][0]].swarm_worker_token }}
-        {{ hostvars[groups['manager'][0]].ansible_host }}:2377
-      args:
-        creates: /tmp/swarm_joined
+    - name: Join node as worker (idempotent)
+      community.docker.docker_swarm:
+        state: join
+        join_token: "{{ hostvars[groups['manager'][0]].swarm_worker_token }}"
+        remote_addrs:
+          - "{{ hostvars[groups['manager'][0]].swarm_manager_ip }}"
+        advertise_addr: "{{ ansible_default_ipv4.address }}"
+
+# (Optionnel) créer un réseau overlay attachable pour vos stacks / services
+- name: Create shared overlay network on manager (optional)
+  hosts: manager
+  become: true
+  tasks:
+    - name: Ensure overlay network exists
+      community.docker.docker_network:
+        name: swarm_overlay
+        driver: overlay
+        attachable: true
+        scope: swarm
+        state: present
+
+# (Optionnel) affichage d'un petit récap
+- name: Show swarm status
+  hosts: manager
+  become: true
+  tasks:
+    - name: List swarm nodes
+      ansible.builtin.command: docker node ls
+      register: nodes
+      changed_when: false
+    - ansible.builtin.debug:
+        var: nodes.stdout_lines
